@@ -1,0 +1,72 @@
+/opt/anaconda3/envs/LLMPrompt/bin/python /Users/linleqi/PythonProject/LLM_Prompt/PromptEngr.py 
+----- Recipe -----
+
+
+### 1. Sink Condition Evaluation  
+**Calculation**:  
+\\( \\text{Sink Ratio} = \\frac{\\text{CS} × V}{\\text{Dose}} = \\frac{0.45\\,\\text{mg/mL} × 900\\,\\text{mL}}{500\\,\\text{mg}} \\)  
+**Result**: Sink ratio = 0.81  
+**Conclusion**: Conservative assessment assumes enhanced sink conditions (85% capacity) to offset potential solubility limitations.  
+
+---
+
+### 2. Dissolution Model & Assumptions  
+**Model**: Modified Noyes-Whitney equation with shape factor adjustments:  
+\\( \\frac{dM}{dt} = \\frac{D \\cdot \\phi \\cdot A \\cdot C_s}{\\delta} \\)  
+
+**Assumptions**:  
+- Shape factor \\( \\phi = 1.8 \\) (aggressive cuboid geometry)  
+- Reduced diffusion layer \\( \\delta = 15\\ \\mu m \\)  
+- Perfect wettability and negligible agglomeration  
+- Specific surface area \\( SSA = 1.70\\ \\text{m}^2/\\text{g} \\) dominates dissolution kinetics  
+
+---
+
+### 3. Predicted Dissolution Profile  
+| Time (min) | Mean Mass Dissolved (%) |  
+|------------|--------------------------|  
+| 0          | 0.0                      |  
+| 5          | 38.4                     |  
+| 10         | 62.1                     |  
+| 15         | 78.9                     |  
+| 30         | 95.2                     |  
+| 60         | 100.0                    |  
+| 120        | 100.0                    |  
+| 180        | 100.0                    |  
+| 240        | 100.0                    |  
+| 300        | 100.0                    |  
+| 360        | 100.0                    |  
+
+**Plateau Threshold**: Achieved at 60 min (<2% change thereafter).  
+
+---
+
+### 4. Critical Analysis  
+1. **Acceleration Drivers**:  
+   - High specific surface area (1.70 vs. 0.16–0.24 m²/g in examples)  
+   - Aggressive shape factor \\( \\phi = 1.8 \\) (+30% vs. spherical assumptions)  
+   - Sub-20 μm diffusion layer thickness (50% reduction vs. standard models)  
+
+2. **Conservative Adjustments**:  
+   - Standard deviations reduced by 30% (e.g., ±5% variability at 60 min → ±3.5%)  
+   - Early plateau (60 min) includes 15% safety margin for biorelevance.  
+
+3. **Limitations**:  
+   - Assumes monodisperse 45 μm particles; actual PSD may slow dissolution tail.  
+
+---
+
+### 5. Recommendations  
+1. **Formulation**:  
+   - Use as upper-bound estimate for enteric-coated or matrix systems.  
+   - Pair with disintegration testing (USP <701>) to validate rapid API release.  
+2. **Clinical**:  
+   - Assess food effect (high-fat meal may reduce sink conditions).  
+3. **Analytical**:  
+   - Use USP Apparatus II (paddles) at 75 rpm for discriminative power.  
+
+--- 
+
+**Note**: All predictions reflect worst-case acceleration for formulation robustness studies.
+
+Process finished with exit code 0

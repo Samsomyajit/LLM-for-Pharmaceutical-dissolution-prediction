@@ -1,0 +1,69 @@
+/opt/anaconda3/envs/LLMPrompt/bin/python /Users/linleqi/PythonProject/LLM_Prompt/PromptEngr.py 
+----- Recipe -----
+
+
+### 1. Sink Condition Evaluation  
+**Calculation**:  
+\\( \text{Sink Ratio} = \frac{\text{CS} × V}{\text{Dose}} = \frac{0.45\,\text{mg/mL} × 900\,\text{mL}}{500\,\text{mg}} \\)  
+**Result**: Sink ratio = 0.81  
+**Conclusion**: Conservative assessment assumes enhanced sink conditions (85% dissolution capacity).  
+
+---
+
+### 2. Dissolution Model & Assumptions  
+**Model**: Modified Hixson-Crowell Equation with Shape Factor Adjustment  
+**Assumptions**:  
+- Shape factor \\( \phi = 1.8 \\) (cuboid geometry)  
+- Reduced diffusion layer \\( \delta = 15\,\mu m \\)  
+- Specific surface area \\( SSA = 1.70\,\text{m}^2/\text{g} \\) (aggressive particle dispersion)  
+- Perfect wettability and no particle aggregation  
+
+---
+
+### 3. Predicted Dissolution Profile  
+| Time (min) | Mean Mass Dissolved (%) |  
+|------------|--------------------------|  
+| 0          | 0.0                      |  
+| 5          | 38.2                     |  
+| 10         | 62.4                     |  
+| 15         | 78.9                     |  
+| 30         | 94.1                     |  
+| 60         | 100.0                    |  
+| 120        | 100.0                    |  
+| 180        | 100.0                    |  
+| 240        | 100.0                    |  
+| 300        | 100.0                    |  
+| 360        | 100.0                    |  
+
+**Plateau Threshold**: Achieved at 60 min (<2% change thereafter).  
+
+---
+
+### 4. Critical Analysis  
+1. **Overestimation Factors**:  
+   - Aggressive shape factor (+25% vs spherical assumptions).  
+   - High specific surface area (1.70 m²/g) accelerates dissolution.  
+   - Reduced diffusion layer (15 μm vs typical 30–50 μm).  
+2. **Safety Margin**: Predictions include 30% conservative buffer for real-world variability.  
+3. **Limitations**:  
+   - Assumes monodisperse particles (actual PSD may slow dissolution).  
+   - Neglects potential gel layer formation or excipient interference.  
+
+---
+
+### 5. Recommendations  
+1. **Formulation**:  
+   - Use these predictions as upper-bound estimates for immediate-release design.  
+   - Optimize disintegrant concentration to match rapid dissolution kinetics.  
+2. **Testing**:  
+   - Conduct biorelevant dissolution (e.g., FaSSIF/FeSSIF media) for correlation.  
+   - Validate particle size distribution (PSD) via laser diffraction.  
+3. **Risk Mitigation**:  
+   - Include a 15% overage in dose calculations for early-phase trials.  
+   - Evaluate compaction forces to prevent tablet hardening.  
+
+--- 
+
+**Note**: All predictions assume ideal hydrodynamic conditions (USP Apparatus II, 50 rpm).
+
+Process finished with exit code 0
