@@ -3,45 +3,37 @@ from scipy.integrate import odeint
 import matplotlib.pyplot as plt
 
 
-# ----------------- 基础物性计算函数 -----------------
 def calculate_D(temp_C, viscosity_Pas, r_molecule):
-    """斯托克斯-爱因斯坦方程计算扩散系数"""
-    R = 8.314  # 气体常数(J/mol/K)
+    R = 8.314  
     T = temp_C + 273.15
     return (R * T) / (6 * np.pi * viscosity_Pas * r_molecule * 6.022e23)  # m²/s
 
 
 def calculate_Sh(r_particle, D, velocity, visc_fluid=0.00089, rho_fluid=1000):
-    """Ranz-Marshall方程计算Sherwood数"""
-    Re = 2 * r_particle * velocity * rho_fluid / visc_fluid  # 雷诺数
-    Sc = visc_fluid / (rho_fluid * D)  # 施密特数
+    Re = 2 * r_particle * velocity * rho_fluid / visc_fluid 
+    Sc = visc_fluid / (rho_fluid * D) 
     return 2 + 0.6 * np.sqrt(Re) * (Sc) ** (1 / 3)
 
 
 def calculate_solubility(temp_C, delta_h=25e3, Tm=150, logP=2.5):
-    """Yalkowsky溶解度方程计算平衡溶解度 (mol/m³)"""
-    R = 8.314  # 添加气体常数定义
+    """Yalkowsky (mol/m³)"""
+    R = 8.314  
     T = temp_C + 273.15
     S_ideal = 10**(0.8 - logP)
     S_corr = S_ideal * np.exp(-delta_h/R * (1/T - 1/(Tm+273.15)))
     return S_corr * 1e3
 
-
-
-# ----------------- 主模型函数 -----------------
 def dissolution_model(y, t, params):
     M = max(y[0], 0)
     r = (3 * M / (4 * np.pi * params['density'])) ** (1 / 3) if M > 1e-18 else 0
 
-    # 动态计算物性参数
     D = calculate_D(params['temp'], params['viscosity'], params['r_mol'])
     Sh = calculate_Sh(r, D, params['velocity'])
     h = 2 * r / Sh if Sh > 1e-6 else 1e-6
 
-    # 计算溶解度（新增的关键步骤）
     Cs_molar = calculate_solubility(params['temp'], params['delta_h'],
                                     params['Tm'], params['logP'])
-    Cs = Cs_molar * params['MW']  # 转换为kg/m³
+    Cs = Cs_molar * params['MW'] 
 
     # 溶出速率计算
     Ct = M / params['V']

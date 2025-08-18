@@ -15,7 +15,7 @@ from langchain.docstore.document import Document
 warnings.filterwarnings("ignore", category=DeprecationWarning)
 
 
-# ------------------------ 初始化模块 ------------------------
+# ------------------------ initialization ------------------------
 def initialize_deepseek_client(api_key: str) -> Ark:
     return Ark(
         api_key=api_key,
@@ -24,7 +24,7 @@ def initialize_deepseek_client(api_key: str) -> Ark:
     )
 
 
-# ------------------------ 自适应检索模块 ------------------------
+# ------------------------ adap ------------------------
 class AdaptiveWeightedRetriever:
     def __init__(self):
         self.default_weights = {
@@ -137,7 +137,7 @@ class AdaptiveWeightedRetriever:
         return [doc for score, doc in scored_docs[:k]]
 
 
-# ------------------------ 数据处理模块 ------------------------
+# ------------------------ data_process ------------------------
 class PharmaDataProcessor:
     @staticmethod
     def _clean_value(raw_value, field_type: str):
@@ -232,7 +232,7 @@ class PharmaDataProcessor:
             doc = Document(
                 page_content=self.generate_semantic_text(meta, times),
                 metadata={
-                    "drug": meta["drug_name"],
+
                     "model_type": meta.get("model_type", "Unknown"),
                     "particle_size_μm": meta.get("particle_size", 0.0),
                     "shape": meta.get("shape", "Unknown"),
@@ -243,7 +243,7 @@ class PharmaDataProcessor:
         return docs
 
 
-# ------------------------ RAG系统模块 ------------------------
+# ------------------------ RAG_mode ------------------------
 class PharmaRAGSystem:
     def __init__(self, api_key: str, model_name: str = "deepseek-r1-250120"):
         self.client = initialize_deepseek_client(api_key)
@@ -340,13 +340,11 @@ class PharmaRAGSystem:
 {{query}}
 
 **STRICT REQUIREMENTS**:
-- English responses ONLY
 - EXACT table format replication
 - LaTeX equations with \\(...\\) delimiters
 - All time points 0-360 min"""
                 except Exception as e:
                     print(f"Template error: {str(e)}")
-                    base_prompt = """Answer in English using:
 ### 1. Sink Condition Evaluation
 ### 2. Dissolution Model & Assumptions
 ### 3. Predicted Dissolution Profile (table)
@@ -395,9 +393,9 @@ class PharmaRAGSystem:
         return result["response"]
 
 
-# ------------------------ 执行示例 ------------------------
+# ------------------------ main ------------------------
 if __name__ == "__main__":
-    API_KEY = "62943a2c-7dc1-4492-ae60-f4de1c6a98b0"
+    API_KEY = "xxxxxxxxx"
     rag_system = PharmaRAGSystem(API_KEY)
 
     try:
@@ -409,8 +407,7 @@ if __name__ == "__main__":
     query = "Predict dissolution profile for Drug Dissolved (%)"
     response = rag_system.generate_response(
         query=query,
-        prompt_template="zeroshot_CoT.txt",
-        output_file="Res_zeroshot_CoT.json"
+        prompt_template="0813-FS-CoT.txt",
     )
 
     print("Query:", query)
