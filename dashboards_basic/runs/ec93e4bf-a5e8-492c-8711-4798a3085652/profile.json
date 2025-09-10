@@ -1,0 +1,26 @@
+[
+  {
+    "time": 0.0,
+    "dissolved": 0.0
+  },
+  {
+    "time": 5.0,
+    "dissolved": 35.0
+  },
+  {
+    "time": 10.0,
+    "dissolved": 75.0
+  },
+  {
+    "time": 15.0,
+    "dissolved": 92.0
+  },
+  {
+    "time": 30.0,
+    "dissolved": 100.0
+  },
+  {
+    "time": 60.0,
+    "dissolved": 100.0
+  }
+]
