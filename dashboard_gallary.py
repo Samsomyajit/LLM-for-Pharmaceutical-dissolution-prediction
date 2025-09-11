@@ -1,5 +1,5 @@
 # dashboard_gallary.py
-# Final polished version: Fixed f2 timeline overflow, .md preview, QC donut legend, and label clipping.
+# FINAL VERSION: 2x2 grid, large fonts, rendered Markdown, fixed paths, compact + expanded plots
 
 import os, re, json, argparse, math, datetime, shutil
 from typing import List, Dict, Any, Optional, Tuple
@@ -10,7 +10,7 @@ import plotly.io as pio
 import plotly.graph_objects as go
 import plotly.express as px
 from plotly.subplots import make_subplots
-import markdown
+import markdown  # For rendering Markdown reports
 
 pio.templates.default = "simple_white"
 
@@ -182,8 +182,8 @@ def overlay_div(run_id: str, pred: List[Dict[str, float]], exp: Optional[List[Di
             y=[p["dissolved"] for p in pred],
             mode="lines+markers",
             name="Predicted",
-            line=dict(color='#1f77b4', width=2.5),
-            marker=dict(size=6, symbol='circle'),
+            line=dict(color='#1f77b4', width=3),
+            marker=dict(size=8, symbol='circle'),
             hovertemplate="Time: %{x:.1f} min<br>Dissolved: %{y:.1f}%<extra></extra>"
         ))
     if exp:
@@ -192,8 +192,8 @@ def overlay_div(run_id: str, pred: List[Dict[str, float]], exp: Optional[List[Di
             y=[p["dissolved"] for p in exp],
             mode="lines+markers",
             name="Experimental",
-            line=dict(color='#ff7f0e', width=2.5, dash='dash'),
-            marker=dict(size=6, symbol='square'),
+            line=dict(color='#ff7f0e', width=3, dash='dash'),
+            marker=dict(size=8, symbol='square'),
             hovertemplate="Time: %{x:.1f} min<br>Dissolved: %{y:.1f}%<extra></extra>"
         ))
     if not pred and not exp:
@@ -202,34 +202,51 @@ def overlay_div(run_id: str, pred: List[Dict[str, float]], exp: Optional[List[Di
             showarrow=False,
             xref="paper", yref="paper",
             x=0.5, y=0.5,
-            font=dict(size=14, color="#666")
+            font=dict(size=18, color="#666")
         )
     fig.update_layout(
-        height=300,
-        margin=dict(l=40, r=20, t=10, b=80),
-        font=dict(family="Inter, sans-serif", size=12),
+        height=450,
+        width=600,
+        margin=dict(l=50, r=30, t=30, b=100),
+        font=dict(family="Inter, sans-serif", size=14),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         legend=dict(
             orientation="h",
             yanchor="top",
-            y=-0.2,
+            y=-0.12,
             xanchor="left",
-            x=0,
+            x=-0.1,
             bgcolor="rgba(255,255,255,0.8)",
-            borderwidth=1
+            borderwidth=1,
+            font=dict(size=14)
         ),
-        xaxis=dict(title="Time (min)", showgrid=True, gridcolor='#eee'),
-        yaxis=dict(title="Dissolved (%)", range=[0, 105], showgrid=True, gridcolor='#eee')
+        xaxis=dict(
+            title="Time (minutes)",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title="Dissolved (%)",
+            title_font=dict(size=16),
+            range=[0, 105],
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        )
     )
+
     fig.add_annotation(
         text=f"Run {run_id[:8]} — Dissolution Profile",
         xref="paper", yref="paper",
-        x=0.5, y=-0.3,
+        x=0.5, y=-0.23,
         showarrow=False,
-        font=dict(size=14, color="#111"),
+        font=dict(size=18, color="#111", family="Inter, sans-serif"),
         xanchor="center", yanchor="top"
     )
+
     return plotly_div(fig, f"ov-{run_id}")
 
 def error_div(run_id: str, pred: List[Dict[str, float]], exp: Optional[List[Dict[str, float]]]) -> Optional[str]:
@@ -240,27 +257,44 @@ def error_div(run_id: str, pred: List[Dict[str, float]], exp: Optional[List[Dict
     fig.add_trace(go.Scatter(
         x=grid, y=err, 
         mode="lines+markers",
-        line=dict(color='#d62728', width=2),
+        line=dict(color='#d62728', width=3),
+        marker=dict(size=8),
         hovertemplate="Error: %{y:.2f}%<extra></extra>"
     ))
     fig.add_hline(y=0, line_color="black", line_width=1, line_dash="dash")
+
     fig.update_layout(
-        height=300,
-        margin=dict(l=40, r=20, t=10, b=80),
-        font=dict(family="Inter, sans-serif", size=12),
+        height=450,
+        width=600,
+        margin=dict(l=50, r=30, t=40, b=100),
+        font=dict(family="Inter, sans-serif", size=14),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(title="Time (min)", showgrid=True, gridcolor='#eee'),
-        yaxis=dict(title="Δ% (Pred - Exp)", showgrid=True, gridcolor='#eee')
+        xaxis=dict(
+            title="Time (min)",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title="Δ% (Pred - Exp)",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        )
     )
+
     fig.add_annotation(
         text="Prediction Error (Δ%)",
         xref="paper", yref="paper",
-        x=0.5, y=-0.3,
+        x=0.5, y=-0.2,
         showarrow=False,
-        font=dict(size=14, color="#111"),
+        font=dict(size=18, color="#111"),
         xanchor="center", yanchor="top"
     )
+
     return plotly_div(fig, f"err-{run_id}")
 
 def residual_hist_div(run_id: str, pred: List[Dict[str, float]], exp: Optional[List[Dict[str, float]]]) -> Optional[str]:
@@ -269,23 +303,39 @@ def residual_hist_div(run_id: str, pred: List[Dict[str, float]], exp: Optional[L
     grid, err = diff_profile(pred, exp)
     fig = px.histogram(x=err, nbins=min(20, max(5, len(err)//2)))
     fig.update_traces(hovertemplate="Error: %{x:.2f}%<br>Count: %{y}<extra></extra>")
+
     fig.update_layout(
-        height=300,
-        margin=dict(l=40, r=20, t=10, b=80),
-        font=dict(family="Inter, sans-serif", size=12),
+        height=450,
+        width=600,
+        margin=dict(l=50, r=30, t=40, b=100),
+        font=dict(family="Inter, sans-serif", size=14),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(title="Δ% (Pred - Exp)", showgrid=True, gridcolor='#eee'),
-        yaxis=dict(title="Count", showgrid=True, gridcolor='#eee')
+        xaxis=dict(
+            title="Δ% (Pred - Exp)",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title="Count",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        )
     )
+
     fig.add_annotation(
         text="Residual Histogram",
         xref="paper", yref="paper",
-        x=0.5, y=-0.3,
+        x=0.5, y=-0.2,
         showarrow=False,
-        font=dict(size=14, color="#111"),
+        font=dict(size=18, color="#111"),
         xanchor="center", yanchor="top"
     )
+
     return plotly_div(fig, f"hist-{run_id}")
 
 def rate_div(run_id: str, pred: List[Dict[str, float]]) -> Optional[str]:
@@ -296,26 +346,43 @@ def rate_div(run_id: str, pred: List[Dict[str, float]]) -> Optional[str]:
     fig.add_trace(go.Scatter(
         x=t, y=r, 
         mode="lines+markers",
-        line=dict(color='#2ca02c', width=2),
+        line=dict(color='#2ca02c', width=3),
+        marker=dict(size=8),
         hovertemplate="Rate: %{y:.2f}%/min<extra></extra>"
     ))
+
     fig.update_layout(
-        height=300,
-        margin=dict(l=40, r=20, t=10, b=80),
-        font=dict(family="Inter, sans-serif", size=12),
+        height=450,
+        width=600,
+        margin=dict(l=50, r=30, t=40, b=100),
+        font=dict(family="Inter, sans-serif", size=14),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(title="Time (min)", showgrid=True, gridcolor='#eee'),
-        yaxis=dict(title="Rate (%/min)", showgrid=True, gridcolor='#eee')
+        xaxis=dict(
+            title="Time (min)",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title="Rate (%/min)",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        )
     )
+
     fig.add_annotation(
         text="Release Rate (d%/dt)",
         xref="paper", yref="paper",
-        x=0.5, y=-0.3,
+        x=0.5, y=-0.2,
         showarrow=False,
-        font=dict(size=14, color="#111"),
+        font=dict(size=18, color="#111"),
         xanchor="center", yanchor="top"
     )
+
     return plotly_div(fig, f"rate-{run_id}")
 
 def qc_bars_div(run_id: str, metrics: Dict[str, Any]) -> str:
@@ -325,68 +392,51 @@ def qc_bars_div(run_id: str, metrics: Dict[str, Any]) -> str:
         valid_keys = ["monotonicity_fraction"]
     vals = [metrics.get(k) for k in valid_keys]
     labels = [k.replace("_", " ").title() for k in valid_keys]
+
     fig = px.bar(pd.DataFrame({"Metric": labels, "Value": vals}), x="Metric", y="Value", text_auto=True)
-    fig.update_traces(textfont_size=12, textposition="outside", cliponaxis=False)
+    fig.update_traces(
+        textfont_size=14,
+        textposition="outside",
+        cliponaxis=False,
+        hovertemplate="%{x}: %{y:.3f}<extra></extra>"
+    )
+
     fig.update_layout(
-        height=300,
-        margin=dict(l=40, r=20, t=10, b=80),
-        font=dict(family="Inter, sans-serif", size=12),
+        height=450,
+        width=600,
+        margin=dict(l=50, r=30, t=40, b=100),
+        font=dict(family="Inter, sans-serif", size=14),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(title="", showgrid=False),
-        yaxis=dict(title="", showgrid=True, gridcolor='#eee')
+        xaxis=dict(
+            title="",
+            title_font=dict(size=16),
+            showgrid=False,
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title="",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        )
     )
+
     fig.add_annotation(
         text="QC Summary Metrics",
         xref="paper", yref="paper",
-        x=0.5, y=-0.3,
+        x=0.5, y=-0.2,
         showarrow=False,
-        font=dict(size=14, color="#111"),
+        font=dict(size=18, color="#111"),
         xanchor="center", yanchor="top"
     )
+
     return plotly_div(fig, f"qc-{run_id}")
 
 # ----- TOP SUMMARY PLOTS -----
 
-def f2_timeline_compact(timeline: List[Dict[str, Any]]) -> Optional[str]:
-    """Compact version for homepage cards."""
-    df = pd.DataFrame([{"run_id": x["run_id"], "ts": x["ts"], "f2": x.get("f2")} for x in timeline if x.get("f2") is not None])
-    if df.empty:
-        return None
-    df = df.sort_values("ts")
-    fig = px.line(df, x="ts", y="f2", markers=True, color_discrete_sequence=['#1f77b4'])
-    fig.update_traces(
-        hovertemplate="Time: %{x}<br>f₂: %{y:.2f}<extra></extra>",
-        marker=dict(size=4),
-        line=dict(width=2)
-    )
-
-    fig.update_layout(
-        height=350,  # Compact height
-        width=600,  # Responsive
-        margin=dict(l=90, r=10, t=20, b=80),
-        font=dict(family="Inter, sans-serif", size=10),
-        plot_bgcolor='rgba(0,0,0,0)',
-        paper_bgcolor='rgba(0,0,0,0)',
-        showlegend=False,
-        xaxis=dict(title="f₂ Timeline (Higher the Better)", showgrid=False, showticklabels=False),
-        yaxis=dict(title="f₂ score", showgrid=False, showticklabels=True, tickfont=dict(size=10))
-    )
-
-    # fig.add_annotation(
-    #     text="f₂ Timeline",
-    #     xref="paper", yref="paper",
-    #     x=0.5, y=-0.3,
-    #     showarrow=False,
-    #     font=dict(size=12, color="#111"),
-    #     xanchor="center", yanchor="top"
-    # )
-
-    return plotly_div(fig, "top-f2-compact")
-
-
 def f2_timeline_expanded(timeline: List[Dict[str, Any]]) -> Optional[str]:
-    """Expanded version for diagnostics page."""
     df = pd.DataFrame([{"run_id": x["run_id"], "ts": x["ts"], "f2": x.get("f2")} for x in timeline if x.get("f2") is not None])
     if df.empty:
         return None
@@ -394,32 +444,47 @@ def f2_timeline_expanded(timeline: List[Dict[str, Any]]) -> Optional[str]:
     fig = px.line(df, x="ts", y="f2", markers=True, color_discrete_sequence=['#1f77b4'])
     fig.update_traces(
         hovertemplate="Time: %{x}<br>f₂: %{y:.2f}<extra></extra>",
-        marker=dict(size=6),
+        marker=dict(size=8),
         line=dict(width=3)
     )
 
     fig.update_layout(
-        height=400,  # Taller for detail
-        width=None,  # Full width
-        margin=dict(l=50, r=20, t=30, b=90),
-        font=dict(family="Inter, sans-serif", size=12),
+        height=450,
+        width=600,
+        margin=dict(l=50, r=30, t=40, b=100),
+        font=dict(family="Inter, sans-serif", size=14),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
         showlegend=False,
-        xaxis=dict(title="Run Time", showgrid=True, gridcolor='#eee', tickangle=25),
-        yaxis=dict(title="f₂ Score (higher is better)", showgrid=True, gridcolor='#eee')
+        xaxis=dict(
+            title="Run Time",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12),
+            tickangle=25
+        ),
+        yaxis=dict(
+            title="f₂ Score (higher is better)",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        )
     )
 
-    # fig.add_annotation(
-    #     text="f₂ Score Timeline Across Runs",
-    #     xref="paper", yref="paper",
-    #     x=0.5, y=-0.2,
-    #     showarrow=False,
-    #     font=dict(size=16, color="#111", weight='bold'),
-    #     xanchor="center", yanchor="top"
-    # )
+    fig.add_annotation(
+        text="f₂ Score Timeline Across Runs",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.25,
+        showarrow=False,
+        font=dict(size=18, color="#111", weight='bold'),
+        xanchor="center", yanchor="top"
+    )
 
     return plotly_div(fig, "top-f2-expanded")
+
+
 
 def mae_timeline_div(timeline: List[Dict[str, Any]]) -> Optional[str]:
     df = pd.DataFrame([{"run_id": x["run_id"], "ts": x["ts"], "mae": x.get("mae")} for x in timeline if x.get("mae") is not None])
@@ -428,23 +493,39 @@ def mae_timeline_div(timeline: List[Dict[str, Any]]) -> Optional[str]:
     df = df.sort_values("ts")
     fig = px.line(df, x="ts", y="mae", markers=True, color_discrete_sequence=['#d62728'])
     fig.update_traces(hovertemplate="Time: %{x}<br>MAE: %{y:.2f}%<extra></extra>")
+
     fig.update_layout(
-        height=300,
-        margin=dict(l=40, r=20, t=10, b=80),
-        font=dict(family="Inter, sans-serif", size=12),
+        height=450,
+        width=600,
+        margin=dict(l=50, r=30, t=40, b=100),
+        font=dict(family="Inter, sans-serif", size=14),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(title="Run Time", showgrid=True, gridcolor='#eee'),
-        yaxis=dict(title="MAE (%)", showgrid=True, gridcolor='#eee')
+        xaxis=dict(
+            title="Run Time",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title="MAE (%)",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        )
     )
+
     fig.add_annotation(
         text="MAE Timeline (lower is better)",
         xref="paper", yref="paper",
-        x=0.5, y=-0.3,
+        x=0.5, y=-0.2,
         showarrow=False,
-        font=dict(size=14, color="#111"),
+        font=dict(size=18, color="#111"),
         xanchor="center", yanchor="top"
     )
+
     return plotly_div(fig, "top-mae")
 
 def t50_t90_scatter_div(rows: List[Dict[str, Any]]) -> Optional[str]:
@@ -458,62 +539,118 @@ def t50_t90_scatter_div(rows: List[Dict[str, Any]]) -> Optional[str]:
         hover_data=["run_id"]
     )
     fig.update_traces(hovertemplate="T50: %{x:.1f} min<br>T90: %{y:.1f} min<br>f₂: %{marker.color:.2f}<extra></extra>")
+
     fig.update_layout(
-        height=300,
-        margin=dict(l=40, r=20, t=10, b=80),
-        font=dict(family="Inter, sans-serif", size=12),
+        height=450,
+        width=600,
+        margin=dict(l=50, r=30, t=40, b=100),
+        font=dict(family="Inter, sans-serif", size=14),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(title="T50 (min)", showgrid=True, gridcolor='#eee'),
-        yaxis=dict(title="T90 (min)", showgrid=True, gridcolor='#eee'),
+        xaxis=dict(
+            title="T50 (min)",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title="T90 (min)",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        ),
         coloraxis_colorbar=dict(title="f₂")
     )
+
     fig.add_annotation(
         text="T50 vs T90 Across Runs",
         xref="paper", yref="paper",
-        x=0.5, y=-0.3,
+        x=0.5, y=-0.2,
         showarrow=False,
-        font=dict(size=14, color="#111"),
+        font=dict(size=18, color="#111"),
         xanchor="center", yanchor="top"
     )
+
     return plotly_div(fig, "top-t50t90")
 
-def t50_t90_scatter_compact(rows: List[Dict[str, Any]]) -> Optional[str]:
+def t50_t90_gauge_compact(rows: List[Dict[str, Any]]) -> Optional[str]:
+    """Compact gauge-style horizontal bars for T50/T90."""
     df = pd.DataFrame([r for r in rows if r.get("T50") is not None and r.get("T90") is not None])
     if df.empty:
         return None
-    fig = px.scatter(
-        df, x="T50", y="T90",
-        size=[10]*len(df),  # Fixed small size
-        color_discrete_sequence=['#1f77b4']
-    )
-    fig.update_traces(
-        hovertemplate="T50: %{x:.1f}<br>T90: %{y:.1f}<extra></extra>",
-        marker=dict(sizemode='diameter', sizeref=0.1)
-    )
+
+    # Take top 4 runs
+    df = df.sort_values("f2", ascending=False).head(4).copy()
+    df["run_id_short"] = df["run_id"].str[:8]
+
+    # Normalize to max T90 for visual consistency
+    max_t90 = df["T90"].max() * 1.1
+
+    fig = go.Figure()
+
+    for i, row in df.iterrows():
+        # T50 bar
+        fig.add_trace(go.Bar(
+            y=[f"{row['run_id_short']} (T50)"],
+            x=[row["T50"]],
+            name="T50",
+            orientation='h',
+            marker=dict(color='#636efa'),
+            hovertemplate="Run: %{y}<br>T50: %{x:.1f} min<extra></extra>"
+        ))
+        # T90 bar
+        fig.add_trace(go.Bar(
+            y=[f"{row['run_id_short']} (T90)"],
+            x=[row["T90"]],
+            name="T90",
+            orientation='h',
+            marker=dict(color='#ef553b'),
+            hovertemplate="Run: %{y}<br>T90: %{x:.1f} min<extra></extra>"
+        ))
 
     fig.update_layout(
         height=350,
         width=600,
-        margin=dict(l=20, r=10, t=20, b=80),
-        font=dict(size=10),
+        margin=dict(l=150, r=20, t=30, b=80),
+        font=dict(size=11),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        showlegend=False,
-        xaxis=dict(title="T50 (min)", showgrid=False, showticklabels=True),
-        yaxis=dict(title="T90 (min)", showgrid=False, showticklabels=True)
+        barmode='group',
+        showlegend=True,
+        legend=dict(
+            orientation="h",
+            yanchor="bottom",
+            y=1.02,
+            xanchor="right",
+            x=1
+        ),
+        xaxis=dict(
+            title="Time (minutes)",
+            title_font=dict(size=13),
+            tickfont=dict(size=11),
+            range=[0, max_t90],
+            showgrid=False,
+            gridcolor='#eee'
+        ),
+        yaxis=dict(
+            title="",
+            tickfont=dict(size=11),
+            showgrid=False
+        )
     )
 
-    # fig.add_annotation(
-    #     text="T50 vs T90",
-    #     xref="paper", yref="paper",
-    #     x=0.5, y=-0.3,
-    #     showarrow=False,
-    #     font=dict(size=12, color="#111"),
-    #     xanchor="center", yanchor="top"
-    # )
+    fig.add_annotation(
+        text="T50 & T90 Comparison (Top 4 Runs)",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.25,
+        showarrow=False,
+        font=dict(size=14, color="#111", weight='bold'),
+        xanchor="center", yanchor="top"
+    )
 
-    return plotly_div(fig, "top-t50t90-compact")
+    return plotly_div(fig, "top-t50t90-gauge-compact")
 
 def prompt_leaderboard_div(rows: List[Dict[str, Any]]) -> Optional[str]:
     df = pd.DataFrame([{"prompt": r.get("prompt_name") or "unknown", "f2": r.get("f2")} for r in rows if r.get("f2") is not None])
@@ -522,23 +659,39 @@ def prompt_leaderboard_div(rows: List[Dict[str, Any]]) -> Optional[str]:
     agg = df.groupby("prompt", as_index=False)["f2"].mean().sort_values("f2", ascending=False).head(10)
     fig = px.bar(agg, x="prompt", y="f2", color_discrete_sequence=['#ff7f0e'])
     fig.update_traces(hovertemplate="Prompt: %{x}<br>Mean f₂: %{y:.2f}<extra></extra>")
+
     fig.update_layout(
-        height=300,
-        margin=dict(l=40, r=20, t=10, b=100),
-        font=dict(family="Inter, sans-serif", size=12),
+        height=450,
+        width=600,
+        margin=dict(l=50, r=30, t=40, b=100),
+        font=dict(family="Inter, sans-serif", size=14),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(title="", tickangle=45, showgrid=False),
-        yaxis=dict(title="Mean f₂", showgrid=True, gridcolor='#eee')
+        xaxis=dict(
+            title="",
+            title_font=dict(size=16),
+            tickangle=30,
+            showgrid=False,
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title="Mean f₂",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        )
     )
+
     fig.add_annotation(
         text="Top 10 Prompts by Mean f₂",
         xref="paper", yref="paper",
-        x=0.5, y=-0.4,
+        x=0.5, y=-0.25,
         showarrow=False,
-        font=dict(size=14, color="#111"),
+        font=dict(size=18, color="#111"),
         xanchor="center", yanchor="top"
     )
+
     return plotly_div(fig, "top-prompt")
 
 def qc_donut_div(cards: List[Dict[str, Any]]) -> Optional[str]:
@@ -555,7 +708,7 @@ def qc_donut_div(cards: List[Dict[str, Any]]) -> Optional[str]:
     <script>
     document.addEventListener('DOMContentLoaded', function() {{
         const data = {json.dumps(data)};
-        const width = 200, height = 200, radius = Math.min(width, height) / 2;
+        const width = 300, height = 300, radius = Math.min(width, height) / 2;
         const svg = d3.select('#qc-donut')
             .append('svg')
             .attr('width', width)
@@ -587,7 +740,6 @@ def qc_donut_div(cards: List[Dict[str, Any]]) -> Optional[str]:
     }});
     </script>
     """
-    # Add legend
     legend_html = """
     <div style="margin-top: 10px; display: flex; gap: 16px;">
         <div style="display: flex; align-items: center; gap: 8px;"><span style="width: 12px; height: 12px; background: #2ca02c; border-radius: 50%;"></span><span style="font-size: 12px;">Pass</span></div>
@@ -706,21 +858,34 @@ def provenance_block_div(latest_run: Dict[str, Any], excel_path: str, outdir: st
     ))
     fig.update_layout(
         barmode="group",
-        height=300,
-        margin=dict(l=40, r=20, t=10, b=80),
-        font=dict(family="Inter, sans-serif", size=12),
+        height=450,
+        width=600,
+        margin=dict(l=50, r=30, t=40, b=100),
+        font=dict(family="Inter, sans-serif", size=14),
         plot_bgcolor='rgba(0,0,0,0)',
         paper_bgcolor='rgba(0,0,0,0)',
-        xaxis=dict(title="", tickangle=-25, showgrid=False),
-        yaxis=dict(title="Similarity Score", showgrid=True, gridcolor='#eee'),
-        legend=dict(orientation="h", yanchor="top", y=-0.3, x=0)
+        xaxis=dict(
+            title="",
+            title_font=dict(size=16),
+            tickangle=-25,
+            showgrid=False,
+            tickfont=dict(size=12)
+        ),
+        yaxis=dict(
+            title="Similarity Score",
+            title_font=dict(size=16),
+            showgrid=True,
+            gridcolor='#eee',
+            tickfont=dict(size=12)
+        ),
+        legend=dict(orientation="h", yanchor="top", y=-0.15, x=0)
     )
     fig.add_annotation(
         text="Top 5 Retrieved Sheets — Similarity Scores",
         xref="paper", yref="paper",
-        x=0.5, y=-0.3,
+        x=0.5, y=-0.25,
         showarrow=False,
-        font=dict(size=14, color="#111"),
+        font=dict(size=18, color="#111"),
         xanchor="center", yanchor="top"
     )
     bar_div = plotly_div(fig, "top-provenance")
@@ -739,7 +904,7 @@ def provenance_block_div(latest_run: Dict[str, Any], excel_path: str, outdir: st
         else:
             sub.add_annotation(text="⚠️ No curve found", showarrow=False, x=0.5, y=0.5, xref="paper", yref="paper", font=dict(color="#f00"))
         sub.update_layout(
-            height=160,
+            height=200,
             margin=dict(l=20, r=10, t=30, b=20),
             showlegend=False,
             font=dict(size=10),
@@ -751,7 +916,7 @@ def provenance_block_div(latest_run: Dict[str, Any], excel_path: str, outdir: st
         sub.add_annotation(
             text=s,
             xref="paper", yref="paper",
-            x=0.5, y=-0.2,
+            x=0.5, y=-0.1,
             showarrow=False,
             font=dict(size=12, color="#111"),
             xanchor="center", yanchor="top"
@@ -759,6 +924,178 @@ def provenance_block_div(latest_run: Dict[str, Any], excel_path: str, outdir: st
         previews_html.append(f"<div class='provcard'>{plotly_div(sub, f'prov-{s}')}</div>")
     previews_html.append("</div></details>")
     return f"<div class='section'>{bar_div}{''.join(previews_html)}</div>"
+
+# ---------------------- Compact Plots for Homepage ----------------------
+
+def f2_timeline_compact(timeline: List[Dict[str, Any]]) -> Optional[str]:
+    df = pd.DataFrame([{"run_id": x["run_id"], "ts": x["ts"], "f2": x.get("f2")} for x in timeline if x.get("f2") is not None])
+    if df.empty:
+        return None
+    df = df.sort_values("ts")
+    fig = px.line(df, x="ts", y="f2", markers=True, color_discrete_sequence=['#1f77b4'])
+    fig.update_traces(
+        hovertemplate="Time: %{x}<br>f₂: %{y:.2f}<extra></extra>",
+        marker=dict(size=4),
+        line=dict(width=2)
+    )
+    fig.update_layout(
+        height=350,
+        width=600,
+        # margin=dict(l=60, r=10, t=20, b=90),
+        font=dict(family="Inter, sans-serif", size=10),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        showlegend=False,
+        xaxis=dict(title="", showgrid=False, showticklabels=False),
+        yaxis=dict(title="", showgrid=False, showticklabels=True, tickfont=dict(size=10))
+    )
+    fig.add_annotation(
+        text="f₂ Timeline",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.3,
+        showarrow=False,
+        font=dict(size=12, color="#111"),
+        xanchor="center", yanchor="top"
+    )
+    return plotly_div(fig, "top-f2-compact")
+
+def t50_t90_contour_compact(rows: List[Dict[str, Any]]) -> Optional[str]:
+    """Compact contour plot for homepage: T50 vs T90 density with f2 color."""
+    df = pd.DataFrame([r for r in rows if r.get("T50") is not None and r.get("T90") is not None and r.get("f2") is not None])
+    if df.empty:
+        return None
+
+    # Take top 50 runs for smoother contour
+    df = df.sort_values("f2", ascending=False).head(50).copy()
+
+    # Create contour plot
+    fig = go.Figure(go.Histogram2dContour(
+        x=df["T50"],
+        y=df["T90"],
+        colorscale="RdYlBu",
+        showscale=True,
+        hovertemplate="T50: %{x:.1f} min<br>T90: %{y:.1f} min<br>Density: %{z}<extra></extra>",
+        colorbar=dict(title="Density")
+    ))
+
+    # Add scatter points on top for reference
+    fig.add_trace(go.Scatter(
+        x=df["T50"],
+        y=df["T90"],
+        mode="markers",
+        marker=dict(
+            size=6,
+            color=df["f2"],
+            colorscale="Viridis",
+            showscale=False,
+            line=dict(width=1, color='white')
+        ),
+        hovertemplate="T50: %{x:.1f} min<br>T90: %{y:.1f} min<br>f₂: %{marker.color:.2f}<extra></extra>",
+        name="Runs"
+    ))
+
+    fig.update_layout(
+        height=350,
+        width=600,
+        margin=dict(l=50, r=20, t=30, b=80),
+        font=dict(size=11),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        showlegend=False,
+        xaxis=dict(
+            title="T50 (minutes)",
+            title_font=dict(size=13),
+            tickfont=dict(size=11),
+            showgrid=True,
+            gridcolor='#eee'
+        ),
+        yaxis=dict(
+            title="T90 (minutes)",
+            title_font=dict(size=13),
+            tickfont=dict(size=11),
+            showgrid=True,
+            gridcolor='#eee'
+        ),
+        coloraxis_colorbar=dict(title="f₂")
+    )
+
+    fig.add_annotation(
+        text="T50 vs T90 Density Contour (Top 50 Runs)",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.18,
+        showarrow=False,
+        font=dict(size=14, color="#111", weight='bold'),
+        xanchor="center", yanchor="top"
+    )
+
+    return plotly_div(fig, "top-t50t90-contour-compact")
+
+def t50_t90_scatter_compact(rows: List[Dict[str, Any]]) -> Optional[str]:
+    df = pd.DataFrame([r for r in rows if r.get("T50") is not None and r.get("T90") is not None])
+    if df.empty:
+        return None
+    fig = px.scatter(
+        df, x="T50", y="T90",
+        size=[10]*len(df),
+        color_discrete_sequence=['#1f77b4']
+    )
+    fig.update_traces(
+        hovertemplate="T50: %{x:.1f}<br>T90: %{y:.1f}<extra></extra>",
+        marker=dict(sizemode='diameter', sizeref=0.1)
+    )
+    fig.update_layout(
+        height=220,
+        width=300,
+        margin=dict(l=20, r=10, t=20, b=50),
+        font=dict(size=10),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        showlegend=False,
+        xaxis=dict(title="", showgrid=False, showticklabels=False),
+        yaxis=dict(title="", showgrid=False, showticklabels=False)
+    )
+    fig.add_annotation(
+        text="T50 vs T90",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.3,
+        showarrow=False,
+        font=dict(size=12, color="#111"),
+        xanchor="center", yanchor="top"
+    )
+    return plotly_div(fig, "top-t50t90-compact")
+
+def prompt_leaderboard_compact(rows: List[Dict[str, Any]]) -> Optional[str]:
+    df = pd.DataFrame([{"prompt": r.get("prompt_name") or "unknown", "f2": r.get("f2")} for r in rows if r.get("f2") is not None])
+    if df.empty:
+        return None
+    agg = df.groupby("prompt", as_index=False)["f2"].mean().sort_values("f2", ascending=False).head(5)
+    fig = px.bar(agg, x="prompt", y="f2", color_discrete_sequence=['#ff7f0e'])
+    fig.update_traces(
+        hovertemplate="Prompt: %{x}<br>Mean f₂: %{y:.2f}<extra></extra>",
+        texttemplate='%{y:.1f}',
+        textposition='outside',
+        textfont_size=10
+    )
+    fig.update_layout(
+        height=350,
+        width=400,
+        margin=dict(l=30, r=10, t=20, b=60),
+        font=dict(size=10),
+        plot_bgcolor='rgba(0,0,0,0)',
+        paper_bgcolor='rgba(0,0,0,0)',
+        showlegend=False,
+        xaxis=dict(title="", tickangle=30, showgrid=False, tickfont=dict(size=9)),
+        yaxis=dict(title="", showgrid=True, gridcolor='#eee', tickfont=dict(size=9))
+    )
+    fig.add_annotation(
+        text="Top Prompts",
+        xref="paper", yref="paper",
+        x=0.5, y=-0.3,
+        showarrow=False,
+        font=dict(size=12, color="#111"),
+        xanchor="center", yanchor="top"
+    )
+    return plotly_div(fig, "top-prompt-compact")
 
 # ---------------------- HTML ----------------------
 
@@ -791,7 +1128,6 @@ def _retrieval_table_html(retrieve_payload: Dict[str, Any], outdir: str, max_row
     """
 
 def get_common_head(title: str) -> str:
-    """Return common <head> and top nav for all pages."""
     return f"""
 <!doctype html>
 <meta charset='utf-8'/>
@@ -907,28 +1243,21 @@ def get_common_head(title: str) -> str:
 """
 
 def write_homepage(cards: List[Dict[str, Any]], timeline: List[Dict[str, Any]], t50t90_rows: List[Dict[str, Any]], prompt_rows: List[Dict[str, Any]], outdir: str) -> str:
-    """Write homepage with navigation and top summaries using COMPACT plots."""
     html = [get_common_head("💊 Pharma Dissolve Dashboard — Home")]
-
-    # Navigation
     html.append("""
     <div class="nav">
         <a href="diagnostics.html">📊 View Diagnostics</a>
         <a href="#runs">🧪 Browse Runs</a>
     </div>
     """)
-
     html.append("<h1>💊 Pharma Dissolve Dashboard</h1>")
     html.append("<p>Interactive dashboard for dissolution profile analysis. Navigate using buttons above.</p>")
-
-    # Jump to run
     html.append("""
     <div style="margin: 24px 0; padding: 16px; background: white; border-radius: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
         <h3>🔍 Jump to Run ID</h3>
         <input id="run-jump" type="text" placeholder="Enter Run ID" style="margin-right: 8px;">
         <button onclick="jumpToRun()" style="padding: 8px 16px; background: #2563eb; color: white; border: none; border-radius: 6px; cursor: pointer;">Go</button>
     </div>
-
     <script>
     function jumpToRun() {
         const id = document.getElementById('run-jump').value.trim();
@@ -943,26 +1272,16 @@ def write_homepage(cards: List[Dict[str, Any]], timeline: List[Dict[str, Any]], 
     });
     </script>
     """)
-
-    # Generate COMPACT blocks for homepage
     compact_f2_block = f2_timeline_compact(timeline)
-    compact_t50t90_block = t50_t90_scatter_compact(t50t90_rows)
-
-    top_blocks_preview = [
-        compact_f2_block,
-        compact_t50t90_block,
-    ]
-
-    # Top summaries preview (first 3)
+    compact_t50t90_block = t50_t90_contour_compact(t50t90_rows)
+    compact_prompt_block = prompt_leaderboard_compact(prompt_rows)
+    top_blocks_preview = [compact_f2_block, compact_t50t90_block, compact_prompt_block]
     html.append("<h2>📈 Diagnostics Preview</h2>")
-    html.append("<div style='display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;'>")
+    html.append("<div style='display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px;'>")
     for block in top_blocks_preview:
         if block:
-            # Wrap in section for consistent styling
             html.append(f"<div class='section'>{block}</div>")
     html.append("</div>")
-
-    # Run index
     html.append("<h2 id='runs'>🧪 All Runs</h2>")
     html.append("<div class='run-grid'>")
     for c in cards:
@@ -979,7 +1298,6 @@ def write_homepage(cards: List[Dict[str, Any]], timeline: List[Dict[str, Any]], 
         </div>
         """)
     html.append("</div>")
-
     ensure_dir(outdir)
     out_path = os.path.join(outdir, "index.html")
     with open(out_path, "w", encoding="utf-8") as f:
@@ -987,54 +1305,41 @@ def write_homepage(cards: List[Dict[str, Any]], timeline: List[Dict[str, Any]], 
     return out_path
 
 def write_diagnostics_page(cards: List[Dict[str, Any]], top_blocks: List[str], outdir: str) -> str:
-    """Write diagnostics page with full-width plots."""
     html = [get_common_head("💊 Pharma Dissolve Dashboard — Diagnostics")]
-
-    # Navigation
     html.append("""
     <div class="nav">
         <a href="index.html">🏠 Home</a>
         <a href="#runs">🧪 Browse Runs</a>
     </div>
     """)
-
     html.append("<h1>📊 Global Diagnostics</h1>")
     html.append("<p>Comprehensive metrics across all runs.</p>")
-
-    for i, block in enumerate(top_blocks):
+    html.append("<div style='display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 32px;'>")
+    for block in top_blocks:
         if block:
-            html.append(block)  # Each block is already wrapped in <div class='section'>
-
-    # Run quick links
+            html.append(f"<div class='section'>{block}</div>")
+    html.append("</div>")
     html.append("<h2 id='runs'>🧪 Quick Run Access</h2>")
     html.append("<div class='quick-links'>")
-    for c in cards[:30]:  # First 30 runs
+    for c in cards[:30]:
         rid = c['run_id']
         html.append(f"<a href='runs/{rid}.html'>{rid[:8]}</a>")
     html.append("</div>")
-
     ensure_dir(outdir)
     out_path = os.path.join(outdir, "diagnostics.html")
     with open(out_path, "w", encoding="utf-8") as f:
         f.write("\n".join(html))
     return out_path
 
-import markdown  # ✅ Add this import at the top of your file
-
 def write_run_detail_page(card: Dict[str, Any], outdir: str) -> str:
-    """Write individual run detail page with full-width plots."""
     rid = card['run_id']
     html = [get_common_head(f"💊 Run {rid} — Details")]
-
-    # Navigation
     html.append("""
     <div class="nav">
         <a href="../index.html">🏠 Home</a>
         <a href="../diagnostics.html">📊 Diagnostics</a>
     </div>
     """)
-
-    # Run header
     html.append(f"<div class='run-header'>")
     html.append(f"<h1>🧪 Run: {rid}</h1>")
     html.append(f"<div class='run-meta'>")
@@ -1055,8 +1360,6 @@ def write_run_detail_page(card: Dict[str, Any], outdir: str) -> str:
     if card.get("metrics", {}).get("mae") is not None:
         html.append(f"<div>📉 MAE: {card['metrics']['mae']:.2f}%</div>")
     html.append("</div>")
-
-    # Links — now using filename only (relative to runs/)
     links = []
     if card.get("report"):
         report_filename = os.path.basename(card["report"])
@@ -1066,63 +1369,36 @@ def write_run_detail_page(card: Dict[str, Any], outdir: str) -> str:
         links.append(f"<a href='{profile_filename}' target='_blank'>📊 Profile JSON</a>")
     if links:
         html.append("<div>" + " | ".join(links) + "</div>")
-
     html.append("</div>")
-
-    # Plots — now full width
+    html.append("<h2>📈 Analysis Plots</h2>")
+    html.append("<div style='display: grid; grid-template-columns: repeat(2, 1fr); gap: 24px; margin-bottom: 32px;'>")
     plot_keys = ["overlay_div", "error_div", "hist_div", "rate_div", "qc_div"]
-    plot_titles = [
-        "Dissolution Profile (Predicted vs Experimental)",
-        "Prediction Error (Δ%)",
-        "Residual Histogram",
-        "Release Rate (d%/dt)",
-        "QC Summary Metrics"
-    ]
-
-    for key, title in zip(plot_keys, plot_titles):
+    for key in plot_keys:
         div = card.get(key)
         if div:
-            html.append(f"<div class='section'>")
-            html.append(f"<div class='section-title'>{title}</div>")
-            div = div.replace('height=300', 'height=450')
-            html.append(f"<div class='plot-container'>{div}</div>")
-            html.append("</div>")
-
-    # Retrieval evidence
+            html.append(f"<div class='section' style='height: 450px;'>{div}</div>")
+    html.append("</div>")
     if card.get("retrieve_payload"):
         html.append("<div class='section'>")
         html.append("<div class='section-title'>🔍 Retrieval Evidence</div>")
         html.append(_retrieval_table_html(card["retrieve_payload"], outdir))
         html.append("</div>")
-
-    # Report preview — Render Markdown properly
     if card.get("report"):
         html.append("<div class='section'>")
         html.append("<div class='section-title'>📄 Report Content</div>")
         try:
             with open(card["report"], 'r', encoding='utf-8') as f:
                 report_text = f.read()
-
-            # Convert Markdown to HTML with extensions for tables, code blocks, etc.
             html_content = markdown.markdown(report_text, extensions=[
-                'fenced_code',     # For ```code blocks
-                'tables',          # For | Table | syntax
-                'nl2br',           # Convert \n to <br>
-                'extra'            # Includes strikethrough, footnotes, etc.
+                'fenced_code',
+                'tables',
+                'nl2br',
+                'extra'
             ])
-
-            # Optional: Add style to make it look nicer
-            styled_content = f"""
-            <div style="font-family: 'Inter', sans-serif; line-height: 1.6; color: #333;">
-                {html_content}
-            </div>
-            """
-
-            html.append(styled_content)
+            html.append(f"<div style='font-family: Inter, sans-serif; line-height: 1.6;'>{html_content}</div>")
         except Exception as e:
             html.append(f"<p style='color: #d32f2f;'>Error reading report: {str(e)}</p>")
         html.append("</div>")
-
     run_dir = os.path.join(outdir, "runs")
     ensure_dir(run_dir)
     out_path = os.path.join(run_dir, f"{rid}.html")
@@ -1133,7 +1409,6 @@ def write_run_detail_page(card: Dict[str, Any], outdir: str) -> str:
 # ---------------------- Run loading ----------------------
 
 def load_runs_all_stages(log_path: str) -> Dict[str, Dict[str, Any]]:
-    """Return {run_id: {'final':..., 'prompt':..., 'retrieve':..., 'final_ts':...}}."""
     runs: Dict[str, Dict[str, Any]] = {}
     with open(log_path, "r", encoding="utf-8") as f:
         for line in f:
@@ -1157,7 +1432,6 @@ def load_runs_all_stages(log_path: str) -> Dict[str, Dict[str, Any]]:
                 runs[rid]["prompt"] = payload
             elif stage == "retrieve":
                 runs[rid]["retrieve"] = payload
-    # keep only those with final artifacts
     return {rid: st for rid, st in runs.items() if "final" in st and "report_path" in st["final"]}
 
 def load_profile(path: str) -> Optional[List[Dict[str, float]]]:
@@ -1176,7 +1450,6 @@ def load_profile(path: str) -> Optional[List[Dict[str, float]]]:
     return out if out else None
 
 def find_prompt_file(run_id: str, run_dir: str, runs_meta: Dict[str, Any]) -> Tuple[str, Optional[str]]:
-    """Return (prompt_name, prompt_path or None). Prefers logged name; falls back to first *.txt."""
     prompt_name = (
         runs_meta.get("final", {}).get("prompt_filename") or
         runs_meta.get("prompt", {}).get("prompt_filename")
@@ -1192,13 +1465,12 @@ def find_prompt_file(run_id: str, run_dir: str, runs_meta: Dict[str, Any]) -> Tu
     return "unknown.txt", None
 
 def copy_artifacts_into_gallery(run_id: str, report: Optional[str], profile: Optional[str], runs_dir: str) -> Tuple[Optional[str], Optional[str]]:
-    """Copy report/profile into gallery/runs/ using correct filenames (NO subfolder)."""
-    ensure_dir(runs_dir)  # Ensure runs/ exists
+    ensure_dir(runs_dir)
     new_report = None
     new_profile = None
     if report and os.path.exists(report):
-        report_filename = os.path.basename(report)  # e.g., '7d1b3506-..._report.md'
-        new_report = os.path.join(runs_dir, report_filename)  # ← Directly in runs/
+        report_filename = os.path.basename(report)
+        new_report = os.path.join(runs_dir, report_filename)
         shutil.copyfile(report, new_report)
     if profile and os.path.exists(profile):
         profile_filename = os.path.basename(profile)
@@ -1221,12 +1493,9 @@ def main():
 
     runs_all = load_runs_all_stages(args.log)
 
-    # timelines / aggregates
     timeline: List[Dict[str, Any]] = []
     t50t90_rows: List[Dict[str, Any]] = []
     prompt_rows: List[Dict[str, Any]] = []
-
-    # build cards
     cards: List[Dict[str, Any]] = []
     latest_rid = None
     latest_ts = datetime.datetime.min
@@ -1245,14 +1514,10 @@ def main():
             latest_ts = ts
             latest_rid = rid
 
-        # run directory (to resolve prompt name; artifacts still reside elsewhere)
         run_dir = os.path.dirname(report) if report else os.path.join("artifacts", f"run_{rid}")
         prompt_name, prompt_path = find_prompt_file(rid, run_dir, stages)
 
-        # predicted profile
         pred = load_profile(profile) if profile and os.path.exists(profile) else None
-
-        # experimental curve via first listed source sheet
         exp = None
         for s in sources:
             sheet = s.get("sheet")
@@ -1261,17 +1526,14 @@ def main():
                 if exp:
                     break
 
-        # copy artifacts into gallery to avoid 404 — now uses actual filename
         report_copy, profile_copy = copy_artifacts_into_gallery(rid, report, profile, runs_dir)
 
-        # per-run figures (divs)
         ov = overlay_div(rid, pred or [], exp)
         err = error_div(rid, pred or [], exp)
         hist = residual_hist_div(rid, pred or [], exp)
         rate = rate_div(rid, pred or [])
         qc = qc_bars_div(rid, metrics)
 
-        # f2 + mae for timelines
         f2_val = None
         mae_val = metrics.get("mae")
         if pred and exp:
@@ -1301,22 +1563,15 @@ def main():
             "pred": pred,
         })
 
-    # Generate COMPACT blocks for homepage
-    compact_f2_block = f2_timeline_compact(timeline)
-    compact_t50t90_block = t50_t90_scatter_compact(t50t90_rows)
-
-    # Generate EXPANDED blocks for diagnostics
     f2_block_expanded = f2_timeline_expanded(timeline)
-    t50t90_block_expanded = t50_t90_scatter_div(t50t90_rows)  # assuming this is already large
+    t50t90_block_expanded = t50_t90_scatter_div(t50t90_rows)
     prompt_block_expanded = prompt_leaderboard_div(prompt_rows)
     qc_donut_block = qc_donut_div(cards)
     thumbs_block = thumbnails_wall_div(cards)
 
-    # provenance for latest run
     latest_run_card = next((c for c in cards if c["run_id"] == latest_rid), None)
     provenance_block = provenance_block_div(latest_run_card, args.excel, gallery_dir) if latest_run_card else None
 
-    # Diagnostics page uses expanded blocks
     top_blocks_diagnostics = [
         thumbs_block,
         f2_block_expanded,
@@ -1326,17 +1581,9 @@ def main():
         provenance_block
     ]
 
-    # Homepage uses compact blocks
-    top_blocks_homepage = [
-        compact_f2_block,
-        compact_t50t90_block
-    ]
-
-    # Generate pages
     homepage_path = write_homepage(cards, timeline, t50t90_rows, prompt_rows, gallery_dir)
     diagnostics_path = write_diagnostics_page(cards, top_blocks_diagnostics, gallery_dir)
 
-    # Generate individual run pages
     for card in cards:
         write_run_detail_page(card, gallery_dir)
 
