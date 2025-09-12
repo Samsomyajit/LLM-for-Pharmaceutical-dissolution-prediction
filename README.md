@@ -1,148 +1,73 @@
-# 🧪 Pharma Dissolution Dashboard — Diagnosict AI
+# PharmaDissolveMCP Server
 
-> **Interactive multi-page dashboard for visualizing pharmaceutical dissolution profiles, QC metrics, and LLM-generated reports.**
+This document provides instructions on how to deploy and run the PharmaDissolveMCP server.
 
-Built with Python, Plotly, D3.js, and Markdown — **no backend required**. Perfect for QC teams, formulation scientists, and AI/ML reviewers.
+## Prerequisites
 
----
+- Python 3.8+
+- `pip` for installing packages
 
-## 🚀 Features
+## 1. Setup
 
-✅ **Multi-page navigation** — Homepage, Diagnostics, Individual Run Details  
-✅ **Rendered Markdown reports** — No more raw text — full formatting with headers, lists, code blocks  
-✅ **Zoom/Pan enabled** on all plots — Explore data interactively  
-✅ **Compact + Expanded views** — Homepage cards are small; Diagnostics page is full-width  
-✅ **QC Donut with Legend** — Clear Pass/Fail visualization  
-✅ **Clickable Run Thumbnails** — Jump to any run with one click  
-✅ **Search & Filter** — Jump to Run ID or filter by prompt  
-✅ **Static & Portable** — Just run `python -m http.server` — no database or Flask needed
-
----
-
-## 📦 Prerequisites
-
-You need:
-
-- Python 3.9+
-- Git (optional, for version control)
-- Terminal / Command Prompt
-
----
-
-## ⚙️ Installation & Setup
-
-### 1. Clone or Download Project
-
-If using Git:
+First, create and activate a virtual environment to isolate the dependencies:
 
 ```bash
-git clone https://github.com/yourusername/LLM-for-Pharmaceutical-dissolution-prediction.git
-cd LLM-for-Pharmaceutical-dissolution-prediction
+python3 -m venv .venv
+source .venv/bin/activate
 ```
 
-Or just download the folder and `cd` into it.
+## 2. Installation
 
----
-
-### 2. Set Up Virtual Environment (Recommended)
+Install the required Python packages using the `requirements.txt` file:
 
 ```bash
-python -m venv .venv
-source .venv/bin/activate   # On Windows: .venv\Scripts\activate
+pip install -r requirements.txt
 ```
 
----
+## 3. Environment Variables
 
-### 3. Install Dependencies
+Before running the server, you need to configure the following environment variables. These are essential for connecting to the language model service.
 
 ```bash
-pip install plotly pandas numpy openpyxl d3py markdown
+# Set your API key for the LLM provider
+export OPENROUTER_API_KEY="your_openrouter_api_key_here"
+
+# Set the model identifier
+export LLM_MODEL="deepseek/deepseek-chat-v3.1:free"
+
+# (Optional) Set these if required by your provider or for tracking
+export OPENROUTER_SITE_URL="http://localhost"
+export OPENROUTER_APP_TITLE="PharmaDissolve-MCP"
 ```
 
-> ✅ `plotly` — for interactive charts  
-> ✅ `pandas` — for data handling  
-> ✅ `openpyxl` — for reading Excel files  
-> ✅ `markdown` — for rendering `.md` reports  
-> ✅ `numpy` — for math operations
+## 4. Running the Server
 
----
-
-## ▶️ Generate Dashboard
-
-Run the dashboard generator:
+Once the environment is configured, you can start the Flask server:
 
 ```bash
-python dashboard_gallary.py \
-    --excel RAG_database.xlsx \
-    --log mcp_runs.jsonl \
-    --out dashboards_basic
+python serve.py
 ```
 
-### Arguments:
+The server will start on port 8080 by default. You can access it at `http://localhost:8080`.
 
-| Flag | Description | Required |
-|------|-------------|----------|
-| `--excel` | Path to Excel file with experimental curves | ✅ Yes |
-| `--log` | Path to `mcp_runs.jsonl` log file | ✅ Yes |
-| `--out` | Output folder for generated dashboard (default: `dashboards_basic`) | ❌ No |
+## 5. Using the API
 
----
+You can send a POST request to the `/predict` endpoint with a JSON payload to get a prediction.
 
-## 🌐 Serve & View Dashboard
+**Endpoint:** `http://localhost:8080/predict`
 
-After generation, serve the dashboard locally:
+**Method:** `POST`
 
+**Body:**
+```json
+{
+  "query": "Predict dissolution profile for Ibuprofen 200mg tablet"
+}
+```
+
+**Example using `curl`:**
 ```bash
-cd dashboards_basic
-python -m http.server 8000
+curl -X POST -H "Content-Type: application/json" \
+-d '{"query": "Predict dissolution profile for Ibuprofen 200mg tablet"}' \
+http://localhost:8080/predict
 ```
-
-Then open in your browser:
-
-👉 [http://localhost:8000](http://localhost:8000)
-
----
-
-## 🖥️ Dashboard Structure
-
-```
-dashboards_basic/
-├── index.html                  ← Homepage: Run list + compact diagnostics
-├── diagnostics.html            ← Full diagnostics: f2 timeline, scatter, leaderboard, QC, thumbnails
-└── runs/
-    ├── <run_id>.html           ← Individual run detail page (5 plots + rendered report)
-    └── <run_id>_report.md      ← Copied report file (rendered in HTML)
-```
-
----
-
-## 📊 What You’ll See
-
-### 🏠 Homepage (`index.html`)
-- Navigation bar
-- Jump-to-run search box
-- Compact previews: f₂ timeline, T50/T90 scatter, prompt leaderboard
-- Grid of all runs with f₂ score and “View Details” button
-
-### 📈 Diagnostics Page (`diagnostics.html`)
-- Full-width, detailed plots:
-  - f₂ Timeline (expanded)
-  - T50 vs T90 Scatter
-  - Prompt Leaderboard
-  - QC Pass/Fail Donut (with legend)
-  - Profile Thumbnails Wall (click to navigate)
-  - Provenance Bar + Sheet Previews
-
-### 🧪 Run Detail Page (`runs/<run_id>.html`)
-- Run metadata: ID, timestamp, prompt, f₂, MAE
-- 5 full-width plots:
-  - Dissolution Profile (Pred vs Exp)
-  - Prediction Error (Δ%)
-  - Residual Histogram
-  - Release Rate (d%/dt)
-  - QC Summary Metrics
-- Retrieval evidence table
-- **Fully rendered Markdown report** (headers, bold, code, tables)
-- Links to download raw `.md` and `.json`
-
----

@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beautiful Image Upload</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .upload-container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 500px;
+            overflow: hidden;
+            padding: 30px;
+            transition: all 0.3s ease;
+        }
+
+        .upload-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .upload-header h2 {
+            color: #333;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 24px;
+        }
+
+        .upload-header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            margin-bottom: 20px;
+            background-color: #f9f9f9;
+        }
+
+        .upload-area:hover, .upload-area.drag-over {
+            border-color: #667eea;
+            background-color: rgba(102, 126, 234, 0.05);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #666;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .upload-button {
+            color: #667eea;
+            font-weight: 600;
+            text-decoration: underline;
+            cursor: pointer;
+        }
+
+        .file-input {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+
+        .image-preview {
+            margin-top: 20px;
+            display: none;
+        }
+
+        .preview-img {
+            max-width: 100%;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .preview-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .preview-title {
+            color: #333;
+            font-size: 16px;
+        }
+
+        .remove-image {
+            background: none;
+            border: none;
+            color: #ff5252;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .upload-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+            opacity: 0.7;
+            pointer-events: none;
+        }
+
+        .upload-btn.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .upload-btn:hover.active {
+            transform: translateY(-2px);
+            box-shadow: 0 7px 14px rgba(102, 126, 234, 0.3);
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 15px;
+            text-align: center;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="upload-container">
+        <div class="upload-header">
+            <h2>Image Uploader</h2>
+            <p>Drag & drop an image or click to browse</p>
+        </div>
+
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📁</div>
+            <p class="upload-text">Drop your image here or</p>
+            <p class="upload-button">Browse</p>
+            <input type="file" class="file-input" id="fileInput" accept="image/*">
+        </div>
+
+        <div class="image-preview" id="imagePreview">
+            <div class="preview-header">
+                <span class="preview-title">Selected Image:</span>
+                <button class="remove-image" id="removeImage">Remove</button>
+            </div>
+            <img class="preview-img" id="previewImg" src="" alt="Preview">
+        </div>
+
+        <button class="upload-btn" id="uploadBtn">Upload Image</button>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Uploading...</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            Image uploaded successfully!
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const uploadArea = document.getElementById('uploadArea');
+            const fileInput = document.getElementById('fileInput');
+            const previewContainer = document.getElementById('imagePreview');
+            const previewImage = document.getElementById('previewImg');
+            const uploadBtn = document.getElementById('uploadBtn');
+            const removeImageBtn = document.getElementById('removeImage');
+            const loading = document.getElementById('loading');
+            const successMessage = document.getElementById('successMessage');
+
+            // Open file dialog when upload area is clicked
+            uploadArea.addEventListener('click', () => {
+                fileInput.click();
+            });
+
+            // Handle file selection
+            fileInput.addEventListener('change', handleFileSelection);
+
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, preventDefaults, false);
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, highlight, false);
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                uploadArea.addEventListener(eventName, unhighlight, false);
+            });
+
+            function highlight() {
+                uploadArea.classList.add('drag-over');
+            }
+
+            function unhighlight() {
+                uploadArea.classList.remove('drag-over');
+            }
+
+            uploadArea.addEventListener('drop', handleDrop, false);
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+
+                if (files.length) {
+                    fileInput.files = files;
+                    handleFileSelection({ target: fileInput });
+                }
+            }
+
+            function handleFileSelection(e) {
+                const file = e.target.files[0];
+
+                if (file && file.type.startsWith('image/')) {
+                    // Show preview
+                    const reader = new FileReader();
+
+                    reader.onload = function () {
+                        previewImage.src = reader.result;
+                        previewContainer.style.display = 'block';
+                        uploadBtn.classList.add('active');
+                        // Clear previous results
+                        const resultDiv = document.getElementById('result-container');
+                        if (resultDiv) resultDiv.remove();
+                        successMessage.style.display = 'none';
+                    };
+
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            // Remove image functionality
+            removeImageBtn.addEventListener('click', () => {
+                fileInput.value = '';
+                previewContainer.style.display = 'none';
+                uploadBtn.classList.remove('active');
+                successMessage.style.display = 'none';
+                const resultDiv = document.getElementById('result-container');
+                if (resultDiv) resultDiv.remove();
+            });
+
+            // Upload functionality
+            uploadBtn.addEventListener('click', async () => {
+                if (!uploadBtn.classList.contains('active')) return;
+
+                const file = fileInput.files[0];
+                if (!file) return;
+
+                // Show loading state
+                loading.style.display = 'block';
+                uploadBtn.disabled = true;
+                uploadBtn.textContent = 'Processing...';
+
+                // Clear previous result
+                const prevResult = document.getElementById('result-container');
+                if (prevResult) prevResult.remove();
+
+                try {
+                    // Create FormData object
+                    const formData = new FormData();
+                    formData.append('file', file);
+
+                    // Send to FastAPI backend
+                    const response = await fetch('http://localhost:8000/upload-and-segment', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const error = await response.json().catch(() => ({}));
+                        throw new Error(error.detail || 'Upload failed');
+                    }
+
+                    const result = await response.json();
+
+                    // Hide loading
+                    loading.style.display = 'none';
+
+                    // Show success message
+                    successMessage.textContent = 'Segmentation complete!';
+                    successMessage.style.display = 'block';
+
+                    // Create result container
+                    const resultContainer = document.createElement('div');
+                    resultContainer.id = 'result-container';
+                    resultContainer.style.marginTop = '20px';
+                    resultContainer.innerHTML = `
+                        <h3 style="color: #333; margin-bottom: 10px;">Segmentation Result</h3>
+                        <img src="${result.result_url}" 
+                            alt="Segmented Output" 
+                            style="max-width: 100%; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                        <p style="color: #666; font-size: 14px; margin-top: 10px;">
+                            ID: ${result.id}
+                        </p>
+                    `;
+                    uploadArea.parentNode.insertBefore(resultContainer, uploadArea.nextSibling);
+
+                    // Reset button
+                    uploadBtn.textContent = 'Upload Image';
+                    uploadBtn.disabled = false;
+
+                } catch (error) {
+                    console.error('Error:', error);
+                    loading.style.display = 'none';
+                    uploadBtn.disabled = false;
+                    uploadBtn.textContent = 'Upload Image';
+                    alert(`Error: ${error.message || 'Failed to process image.'}`);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
