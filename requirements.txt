@@ -1,0 +1,9 @@
+pandas
+numpy
+openpyxl
+langchain
+langchain-community
+faiss-cpu
+sentence-transformers
+openai
+groq
