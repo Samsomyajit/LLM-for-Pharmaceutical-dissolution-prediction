@@ -724,7 +724,7 @@ class JudgeAgent:
 class PharmaDissolveMCP:
     def __init__(self, api_key: str, model_name: str, kb_path: str = "RAG_database.xlsx", persist_dir: str = "faiss_index"):
         self.logger = JSONLLogger(path="mcp_runs.jsonl", project="PharmaDissolve-MCP")
-        self.prompt_filename = os.getenv("PROMPT_FILE_NAME", "0813-FS-COT.txt")
+        self.prompt_filename = os.getenv("PROMPT_FILE_NAME", "0813-FS.txt")
         self.client = initialize_deepseek_client(api_key)
         self.model_name = model_name
 
@@ -839,7 +839,7 @@ class PharmaDissolveMCP:
             f.write(prompt)
 
         # Also keep your legacy copy (preserves prior behavior)
-        with open(os.path.join(artifacts_dir, "0813-FS-COT.txt"), "w", encoding="utf-8") as f:
+        with open(os.path.join(artifacts_dir, "0813-FS.txt"), "w", encoding="utf-8") as f:
             f.write(prompt)
 
         drafts_resp = self.drafter.draft(prompt, n=n_candidates)

@@ -1,4 +1,4 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException
+from fastapi import FastAPI, Form, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse, JSONResponse
 import uuid
@@ -160,7 +160,13 @@ def is_port_in_use(port):
         return s.connect_ex(('localhost', port)) == 0
 
 @app.post("/upload-and-segment")
-async def upload_and_segment(file: UploadFile = File(...)):
+async def upload_and_segment(
+    file: UploadFile = File(...),
+    diameter: float = Form(15.0),
+    mask_threshold: float = Form(0.0),
+    flow_threshold: float = Form(0.0),
+    cell_probability_threshold: float = Form(0.0)
+):
     if not model:
         raise HTTPException(500, "Segmentation service unavailable")
     
@@ -173,6 +179,7 @@ async def upload_and_segment(file: UploadFile = File(...)):
         img_pil = Image.open(BytesIO(await file.read()))
         img_np = np.array(img_pil.convert('L'))
         logger.info(f"Image shape: {img_np.shape}, dtype: {img_np.dtype}")
+        logger.info(f"Using parameters: diameter={diameter}, mask_threshold={mask_threshold}, flow_threshold={flow_threshold}")
         
         # Enhanced segmentation parameters
         masks, flows, styles = model.eval(
@@ -180,10 +187,12 @@ async def upload_and_segment(file: UploadFile = File(...)):
             channels=[0, 0],
             omni=True,
             invert=False,
-            diameter=15,
-            mask_threshold=0.0,
-            flow_threshold=0.0,
+            diameter=diameter,
+            mask_threshold=mask_threshold,
+            flow_threshold=flow_threshold,
+            cellprob_threshold=cell_probability_threshold
         )
+        logger.info(f"Segmentation complete: {int(masks.max())} masks found")
         
         # Create results directory
         out_id = str(uuid.uuid4())

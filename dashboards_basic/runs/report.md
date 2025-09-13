@@ -1,17 +1,19 @@
 ### SinkCondition
-The sink condition is satisfied. The drug has a solubility of 10.0 mg/mL, which is significantly higher than typical dissolution medium concentrations (usually ≤0.1-1 mg/mL for sink conditions). This high solubility ensures the concentration gradient remains steep, promoting rapid and complete dissolution.
+Based on a solubility of 10.0 mg/mL and a typical dissolution medium volume of 500-900 mL (assuming a standard USP apparatus), sink conditions are highly likely. The dose would need to exceed 5-9 grams to violate sink conditions, which is far above typical pharmaceutical doses for most drugs. The high solubility and extremely fine particle size (0.57 μm) further support rapid dissolution under sink conditions.
 
 ### Profile
 | Time (min) | Dissolved (%) |
 |------------|----------------|
 | 0.00 | 0.00 |
-| 0.50 | 45.00 |
-| 1.00 | 85.00 |
-| 2.00 | 98.00 |
+| 1.00 | 95.00 |
+| 2.00 | 99.00 |
 | 5.00 | 100.00 |
 | 10.00 | 100.00 |
 | 15.00 | 100.00 |
+| 20.00 | 100.00 |
 | 30.00 | 100.00 |
+| 45.00 | 100.00 |
+| 60.00 | 100.00 |
 
 ```json
 {
@@ -21,16 +23,12 @@ The sink condition is satisfied. The drug has a solubility of 10.0 mg/mL, which 
       "dissolved": 0.0
     },
     {
-      "time": 0.5,
-      "dissolved": 45.0
-    },
-    {
       "time": 1.0,
-      "dissolved": 85.0
+      "dissolved": 95.0
     },
     {
       "time": 2.0,
-      "dissolved": 98.0
+      "dissolved": 99.0
     },
     {
       "time": 5.0,
@@ -45,7 +43,19 @@ The sink condition is satisfied. The drug has a solubility of 10.0 mg/mL, which 
       "dissolved": 100.0
     },
     {
+      "time": 20.0,
+      "dissolved": 100.0
+    },
+    {
       "time": 30.0,
+      "dissolved": 100.0
+    },
+    {
+      "time": 45.0,
+      "dissolved": 100.0
+    },
+    {
+      "time": 60.0,
       "dissolved": 100.0
     }
   ]
@@ -53,8 +63,8 @@ The sink condition is satisfied. The drug has a solubility of 10.0 mg/mL, which 
 ```
 
 ### Recommendations
-1. **Dissolution Method Development**: Given the extremely rapid dissolution (complete within 2-5 minutes), standard USP apparatus (e.g., paddle or basket) may not provide sufficient discriminatory power. Consider using a flow-through cell apparatus or adjusting agitation rates to better capture the dissolution kinetics.
-2. **Sampling Frequency**: Use very early time points (e.g., 0.25, 0.5, 1, 2 minutes) to adequately characterize the rapid initial dissolution phase. The provided profile includes these critical early points.
-3. **Sink Condition Maintenance**: Although sink condition is satisfied, confirm the medium volume is sufficient to maintain sink conditions throughout the test, especially given the high dose/solubility ratio.
-4. **Particle Size Characterization**: Verify the extremely small particle size (0.47 μm) through appropriate techniques (e.g., laser diffraction, microscopy), as this nanoscale size is the primary driver of the ultra-rapid dissolution.
-5. **Shape Consideration**: While the ellipsoidal shape may influence dissolution, the nanoscale particle size dominates the kinetics, making shape effects negligible in this case.
+1. **Experimental Verification**: While the prediction indicates extremely rapid dissolution due to the nanoscale particle size (0.57 μm) and high solubility, experimental confirmation is essential. The ellipsoidal shape may provide slightly faster dissolution compared to cubic shapes, but the primary driver is the particle size.
+2. **Formulation Considerations**: Such fine particles may present handling challenges (e.g., aggregation, electrostatic charging). Consider appropriate excipients to ensure good flow and dispersion.
+3. **Dissolution Method**: Use a USP Apparatus II (paddle) with a moderate agitation rate (50-75 rpm) to avoid coning or particle entrapment while maintaining sink conditions.
+4. **Sampling Frequency**: Given the predicted rapid dissolution, include early time points (e.g., 1, 2, 5 minutes) to adequately capture the profile.
+5. **Sink Condition Maintenance**: Confirm that the volume and composition of the dissolution medium provide sink conditions throughout the test, though this is highly probable given the high solubility.
