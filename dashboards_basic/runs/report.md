@@ -1,12 +1,12 @@
 ### SinkCondition
-Based on a solubility of 10.0 mg/mL and a typical dissolution medium volume of 500-900 mL (assuming a standard USP apparatus), sink conditions are highly likely. The dose would need to exceed 5-9 grams to violate sink conditions, which is far above typical pharmaceutical doses for most drugs. The high solubility and extremely fine particle size (0.57 μm) further support rapid dissolution under sink conditions.
+The sink condition is satisfied. The drug's solubility (10.0 mg/mL) is significantly higher than the typical concentration in a dissolution vessel (which is usually designed to be ≤15% of solubility to maintain sink conditions). With a high solubility of 10 mg/mL and an extremely small particle size (0.41 μm), the dissolution rate will be very rapid, ensuring the concentration in the vessel remains well below the saturation point.
 
 ### Profile
 | Time (min) | Dissolved (%) |
 |------------|----------------|
 | 0.00 | 0.00 |
-| 1.00 | 95.00 |
-| 2.00 | 99.00 |
+| 0.50 | 95.00 |
+| 1.00 | 100.00 |
 | 5.00 | 100.00 |
 | 10.00 | 100.00 |
 | 15.00 | 100.00 |
@@ -23,12 +23,12 @@ Based on a solubility of 10.0 mg/mL and a typical dissolution medium volume of 5
       "dissolved": 0.0
     },
     {
-      "time": 1.0,
+      "time": 0.5,
       "dissolved": 95.0
     },
     {
-      "time": 2.0,
-      "dissolved": 99.0
+      "time": 1.0,
+      "dissolved": 100.0
     },
     {
       "time": 5.0,
@@ -63,8 +63,7 @@ Based on a solubility of 10.0 mg/mL and a typical dissolution medium volume of 5
 ```
 
 ### Recommendations
-1. **Experimental Verification**: While the prediction indicates extremely rapid dissolution due to the nanoscale particle size (0.57 μm) and high solubility, experimental confirmation is essential. The ellipsoidal shape may provide slightly faster dissolution compared to cubic shapes, but the primary driver is the particle size.
-2. **Formulation Considerations**: Such fine particles may present handling challenges (e.g., aggregation, electrostatic charging). Consider appropriate excipients to ensure good flow and dispersion.
-3. **Dissolution Method**: Use a USP Apparatus II (paddle) with a moderate agitation rate (50-75 rpm) to avoid coning or particle entrapment while maintaining sink conditions.
-4. **Sampling Frequency**: Given the predicted rapid dissolution, include early time points (e.g., 1, 2, 5 minutes) to adequately capture the profile.
-5. **Sink Condition Maintenance**: Confirm that the volume and composition of the dissolution medium provide sink conditions throughout the test, though this is highly probable given the high solubility.
+1.  **Experimental Design:** Due to the predicted extremely rapid dissolution (complete within 1 minute), use a very short sampling interval (e.g., every 15-30 seconds for the first 2 minutes) to accurately capture the dissolution profile. A standard USP Apparatus II (paddle) at 50-75 rpm is suitable.
+2.  **Sink Condition Maintenance:** Although sink condition is predicted to be maintained, confirm this experimentally by ensuring the dose does not exceed 15% of the saturation concentration in the dissolution medium volume.
+3.  **Analytical Method:** Ensure the analytical method (e.g., UV spectroscopy) has a sufficiently short sampling and analysis time to keep up with the rapid dissolution kinetics.
+4.  **Particle Characterization:** The extremely small particle size (0.41 μm) is a critical quality attribute. Strictly control and monitor it during manufacturing, as minor increases could significantly slow the dissolution rate.
