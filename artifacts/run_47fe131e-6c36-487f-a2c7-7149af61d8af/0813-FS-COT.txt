@@ -1,0 +1,96 @@
+### Parameter Summary (from retrieved sources)
+- Drug(s): Hydrochlorothiazide, Theophylline
+- Solubility (mg/mL, mean): 1.7583
+- Shapes: Cuboid, orthorhombic
+
+## Context
+Drug: Theophylline
+• Particle Size: 120.0 μm
+• Solubility: 8.3 mg/mL
+• Model: Unknown
+• Shape: orthorhombic
+
+Dissolution Profile:
+0.0 min: 0.0%
+5.0 min: 93.0%
+10.0 min: 96.0%
+15.0 min: 100.0%
+30.0 min: 100.0%
+(...6 more points)
+
+Drug: Hydrochlorothiazide
+• Particle Size: 45.0 μm
+• Solubility: 0.45 mg/mL
+• Model: Unknown
+• Shape: Cuboid
+
+Dissolution Profile:
+0.0 min: 0.0%
+3.75 min: 40.0%
+7.5 min: 83.0%
+15.0 min: 97.0%
+30.0 min: 100.0%
+(...7 more points)
+
+Drug: Hydrochlorothiazide
+• Particle Size: 45.0 μm
+• Solubility: 0.45 mg/mL
+• Model: Unknown
+• Shape: Cuboid
+
+Dissolution Profile:
+0.0 min: 0.0%
+3.75 min: 55.0%
+7.5 min: 99.0%
+15.0 min: 99.0%
+30.0 min: 99.0%
+(...7 more points)
+
+Drug: Hydrochlorothiazide
+• Particle Size: 45.0 μm
+• Solubility: 0.45 mg/mL
+• Model: Unknown
+• Shape: Cuboid
+
+Dissolution Profile:
+0.0 min: 0.0%
+3.75 min: 30.0%
+7.5 min: 48.0%
+15.0 min: 68.0%
+30.0 min: 93.0%
+(...7 more points)
+
+Drug: Hydrochlorothiazide
+• Particle Size: 200.0 μm
+• Solubility: 0.45 mg/mL
+• Model: Unknown
+• Shape: Cuboid
+
+Dissolution Profile:
+0.0 min: 0.0%
+15.0 min: 23.0%
+30.0 min: 32.0%
+45.0 min: 50.0%
+60.0 min: 61.0%
+(...6 more points)
+
+Drug: Hydrochlorothiazide
+• Particle Size: 97.5 μm
+• Solubility: 0.45 mg/mL
+• Model: Unknown
+• Shape: Cuboid
+
+Dissolution Profile:
+0.0 min: 0.0%
+5.0 min: 21.0%
+10.0 min: 43.0%
+15.0 min: 59.0%
+30.0 min: 86.0%
+(...5 more points)
+
+## Task
+Produce a Markdown report with sections: '### SinkCondition', '### Profile', '### Recommendations'.
+- 'Profile' must include a Markdown table with columns 'Time (min)' and 'Dissolved (%)', and a JSON code block with key "profile" listing objects {time, dissolved}.
+- Ensure monotonic increase, 0–100% bounds.
+## Query
+Predict dissolution profile for Drug Dissolved (%) Particle Size: 0.57 μm Solubility: 10.0 mg/mL Shape: "ellipsoidal"

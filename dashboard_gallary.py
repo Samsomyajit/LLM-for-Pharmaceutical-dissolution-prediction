@@ -476,7 +476,7 @@ def f2_timeline_expanded(timeline: List[Dict[str, Any]]) -> Optional[str]:
     fig.add_annotation(
         text="f₂ Score Timeline Across Runs",
         xref="paper", yref="paper",
-        x=0.5, y=-0.25,
+        x=0.5, y=-0.29,
         showarrow=False,
         font=dict(size=18, color="#111", weight='bold'),
         xanchor="center", yanchor="top"

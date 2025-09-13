@@ -1,9 +1,11 @@
 # PharmaDissolveMCP Server
 
-This document provides instructions on how to deploy and run the PharmaDissolveMCP server.
+This document provides instructions on how to deploy and run the PharmaDissolveMCP server with particle segmentation using omnipose.
 
 ## Prerequisites
 
+- `git clone [this repository]`
+- cd repository
 - Python 3.8+
 - `pip` for installing packages
 
@@ -42,11 +44,19 @@ export OPENROUTER_APP_TITLE="PharmaDissolve-MCP"
 
 ## 4. Running the Server
 
-Once the environment is configured, you can start the Flask server:
+Once the environment is configured, you can start the uvicorn server:
 
 ```bash
-python serve.py
+uvicorn omni_backend:app --host 127.0.0.1 --port 8000
+
 ```
+for the web-interface UI will open into the Segmentation Image upload UI at port 8080 :
+
+```bash
+npx http-server -p 8080
+```
+
+
 
 The server will start on port 8080 by default. You can access it at `http://localhost:8080`.
 
@@ -58,16 +68,4 @@ You can send a POST request to the `/predict` endpoint with a JSON payload to ge
 
 **Method:** `POST`
 
-**Body:**
-```json
-{
-  "query": "Predict dissolution profile for Ibuprofen 200mg tablet"
-}
-```
 
-**Example using `curl`:**
-```bash
-curl -X POST -H "Content-Type: application/json" \
--d '{"query": "Predict dissolution profile for Ibuprofen 200mg tablet"}' \
-http://localhost:8080/predict
-```
