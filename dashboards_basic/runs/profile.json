@@ -4,23 +4,31 @@
     "dissolved": 0.0
   },
   {
+    "time": 0.5,
+    "dissolved": 45.0
+  },
+  {
+    "time": 1.0,
+    "dissolved": 85.0
+  },
+  {
+    "time": 2.0,
+    "dissolved": 98.0
+  },
+  {
     "time": 5.0,
-    "dissolved": 35.0
-  },
-  {
-    "time": 10.0,
-    "dissolved": 75.0
-  },
-  {
-    "time": 15.0,
-    "dissolved": 92.0
-  },
-  {
-    "time": 30.0,
     "dissolved": 100.0
   },
   {
-    "time": 60.0,
+    "time": 10.0,
+    "dissolved": 100.0
+  },
+  {
+    "time": 15.0,
+    "dissolved": 100.0
+  },
+  {
+    "time": 30.0,
     "dissolved": 100.0
   }
 ]
